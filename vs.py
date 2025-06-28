@@ -1,11 +1,13 @@
 import streamlit as st
 import mysql.connector
+import pandas as pd
+import altair as alt
 
 # Database connection
 db = mysql.connector.connect(
     host="localhost",
     user="root",
-    password="ram@123",  # Change this to your MySQL password
+    password="ram@123",
     database="voting_system"
 )
 cursor = db.cursor()
@@ -53,16 +55,15 @@ def get_candidates_by_election(election_id):
     return cursor.fetchall()
 
 # UI Setup
-st.title("🗳️ Student Election System")
+st.title("🗳️ Student Voting System")
 st.sidebar.title("Navigation")
 menu = st.sidebar.radio("Go to", ["Home", "Cast Vote", "Registration", "Admin", "Show Results"])
 
 # Home
 if menu == "Home":
-    st.subheader("Welcome to the Student Election System!")
+    st.subheader("Welcome to the Student Voting System!")
     st.info("Use the sidebar to navigate to voting, registration, or admin options.")
 
-# Cast Vote
 elif menu == "Cast Vote":
     st.subheader("Cast Your Vote")
     active_election = get_active_election()
@@ -76,9 +77,13 @@ elif menu == "Cast Vote":
 
         if not st.session_state.vote_verified:
             user_id = st.text_input("Enter your Student ID:")
+            password = st.text_input("Enter your Password:", type="password")
             if st.button("Verify"):
-                if not is_student_registered(user_id):
-                    st.error("Invalid Student ID. Please register first.")
+                cursor.execute("SELECT * FROM students WHERE student_id = %s AND password = %s", (user_id, password))
+                student = cursor.fetchone()
+
+                if not student:
+                    st.error("Invalid Student ID or Password.")
                 elif has_voted(user_id, election_id):
                     st.warning("You have already voted in this election.")
                 else:
@@ -95,7 +100,10 @@ elif menu == "Cast Vote":
                     candidate_id = candidate_dict.get(selected_name)
                     if candidate_id:
                         record_vote(st.session_state.verified_user_id, candidate_id, election_id)
+                        st.session_state.vote_verified = False
+                        st.session_state.verified_user_id = None
                         st.success("✅ Vote submitted successfully!")
+                        st.session_state.menu = "Home"  # Redirect to Home menu
                     else:
                         st.error("Invalid candidate selection.")
             else:
@@ -197,10 +205,15 @@ elif menu == "Admin":
                 db.commit()
 
                 st.success("Election ended and results saved successfully!")
+        
+        if st.button("Log Out"):
+            st.session_state.logged_in = False
+            st.success("Logged out successfully!")
+            st.rerun()
 
 # Show Results
 elif menu == "Show Results":
-    st.subheader("Election Results")
+    st.subheader("Voting Results")
 
     cursor.execute("SELECT election_name, candidate_name, votes FROM election_results ORDER BY result_time DESC")
     results = cursor.fetchall()
@@ -208,12 +221,20 @@ elif menu == "Show Results":
     if not results:
         st.info("No election data available.")
     else:
-        current = None
-        for r in results:
-            if current != r[0]:
-                st.markdown(f"### 🗳️ {r[0]}")
-                current = r[0]
-            st.write(f"{r[1]}: {r[2]} votes")
+        df = pd.DataFrame(results, columns=["Election", "Candidate", "Votes"])
+
+        for election in df["Election"].unique():
+            st.markdown(f"### 🗳️ {election}")
+            election_df = df[df["Election"] == election]
+
+            # Bar chart
+            bar_chart = alt.Chart(election_df).mark_bar(size=20).encode(
+                x=alt.X('Candidate:N', sort='-y'),
+                y='Votes:Q',
+                tooltip=['Candidate', 'Votes']
+            ).properties(width=600, height=400)
+
+            st.altair_chart(bar_chart, use_container_width=True)
 
     st.markdown("---")
     st.markdown("### ⚠️ Admin Control: Clear Votes & Results")
