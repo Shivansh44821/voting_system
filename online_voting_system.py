@@ -11,7 +11,6 @@ db = mysql.connector.connect(
 )
 cursor = db.cursor()
 
-# Session state setup
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "vote_verified" not in st.session_state:
