@@ -18,7 +18,6 @@ if "vote_verified" not in st.session_state:
 if "verified_user_id" not in st.session_state:
     st.session_state.verified_user_id = None
 
-
 def is_student_registered(student_id):
     cursor.execute("SELECT * FROM students WHERE student_id = %s", (student_id,))
     return cursor.fetchone()
