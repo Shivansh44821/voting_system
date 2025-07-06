@@ -51,7 +51,6 @@ def get_candidates_by_election(election_id):
     cursor.execute("SELECT * FROM candidates WHERE election_id = %s", (election_id,))
     return cursor.fetchall()
 
-# UI Setup
 st.title("🗳️ Student Voting System")
 st.sidebar.title("Navigation")
 menu = st.sidebar.radio("Go to", ["Home", "Cast Vote", "Registration", "Admin", "Show Results"])
