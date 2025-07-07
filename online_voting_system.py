@@ -55,7 +55,6 @@ st.title("🗳️ Student Voting System")
 st.sidebar.title("Navigation")
 menu = st.sidebar.radio("Go to", ["Home", "Cast Vote", "Registration", "Admin", "Show Results"])
 
-# Home
 if menu == "Home":
     st.subheader("Welcome to the Student Voting System!")
     st.info("Use the sidebar to navigate to voting, registration, or admin options.")
