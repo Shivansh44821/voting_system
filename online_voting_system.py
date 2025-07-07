@@ -104,7 +104,6 @@ elif menu == "Cast Vote":
             else:
                 st.error("No candidates found for this election.")
 
-# Registration
 elif menu == "Registration":
     st.subheader("Register as Student or Admin")
     reg_type = st.selectbox("Register as", ["Student", "Admin"])
