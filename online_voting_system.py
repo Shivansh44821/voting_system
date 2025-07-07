@@ -136,7 +136,6 @@ elif menu == "Registration":
                     register_admin(uname[:20], email, pw)
                     st.success("Admin registered successfully!")
 
-# Admin
 elif menu == "Admin":
     st.subheader("Admin Panel")
 
