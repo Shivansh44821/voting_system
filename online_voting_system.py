@@ -3,7 +3,6 @@ import mysql.connector
 import pandas as pd
 import altair as alt
 
-
 db = mysql.connector.connect(
     host="localhost",
     user="root",
