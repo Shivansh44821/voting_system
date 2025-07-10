@@ -204,7 +204,6 @@ elif menu == "Admin":
             st.success("Logged out successfully!")
             st.rerun()
 
-
 elif menu == "Show Results":
     st.subheader("Voting Results")
 
